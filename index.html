@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<!--
+  NASH · "Bake / Play" — a scroll-story remix of the NASH Artisanal Bakery site.
+  Built 6 Oct 2026 in the style of the "POUR / PLAY" coffee-site reel (enkywebstudio on Instagram).
+  Same bakery, same photos, same bilingual copy — new choreography: five pinned scenes,
+  oversized soft-serif words behind the products, falling cinnamon and rose petals,
+  an exploded cookie, a pour, and a coffee wave that wipes into the night.
+
+  The original NashBakery project was not touched. Everything here is self-contained:
+  open index.html straight from disk. No libraries; fonts are self-hosted in assets/fonts (OFL).
+-->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NASH — Baked with heart. Pulled with obsession.</title>
+<meta name="description" content="NASH Artisanal Bakery, Damascus. Cinnamon rolls, Basque cheesecake, the Damascene cookie, matcha and a proper espresso — open till midnight.">
+<link rel="icon" href="assets/logo-ink.png">
+<style>
+  /* Self-hosted fonts (SIL Open Font License, see assets/fonts/), so the site works offline and from disk. */
+  @font-face{font-family:"Fraunces";src:url(assets/fonts/Fraunces.woff) format("woff");font-weight:100 900;font-stretch:normal;font-style:normal;font-display:swap}
+  @font-face{font-family:"Fraunces";src:url(assets/fonts/Fraunces-Italic.woff) format("woff");font-weight:100 900;font-style:italic;font-display:swap}
+  @font-face{font-family:"Inter";src:url(assets/fonts/Inter.woff) format("woff");font-weight:100 900;font-display:swap}
+  @font-face{font-family:"Reem Kufi";src:url(assets/fonts/ReemKufi.woff) format("woff");font-weight:400 700;font-display:swap}
+  @font-face{font-family:"IBM Plex Sans Arabic";src:url(assets/fonts/PlexArabic.woff) format("woff");font-weight:400;font-display:swap}
+  @font-face{font-family:"IBM Plex Sans Arabic";src:url(assets/fonts/PlexArabic-Medium.woff) format("woff");font-weight:500;font-display:swap}
+
+  :root{
+    --cream:#ecdfc8;      /* the page: warm latte paper */
+    --cream-2:#e3d2b4;
+    --latte:#cdb48d;
+    --crema:#b8743a;      /* the big words */
+    --espresso:#3b2417;   /* ink */
+    --night:#1b120d;      /* the SIP section */
+    --olive:#80875c;      /* NASH brand green, used sparingly */
+    --rose:#b64a6d;
+    --f-display:"Fraunces",Georgia,serif;
+    --f-body:"Inter",system-ui,sans-serif;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --gutter:clamp(18px,4vw,56px);
+  }
+  html[lang="ar"]{ --f-display:"Reem Kufi","Fraunces",sans-serif; --f-body:"IBM Plex Sans Arabic","Inter",sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:auto}
+  body{background:var(--cream);color:var(--espresso);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{display:block;max-width:100%}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--crema);outline-offset:4px;border-radius:4px}
+  ::selection{background:var(--espresso);color:var(--cream)}
+
+  /* soft studio light on the whole page, like the laptop mockup */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(120% 80% at 70% 0%,rgba(255,255,255,.35),transparent 60%),
+               radial-gradient(80% 60% at 0% 100%,rgba(120,70,30,.14),transparent 60%);}
+
+  /* ---------- Display type ---------- */
+  .big{font-family:var(--f-display);font-weight:900;font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;
+       line-height:.86;letter-spacing:-.02em;color:var(--crema);text-transform:uppercase}
+  html[lang="ar"] .big{font-weight:700;line-height:1.05;letter-spacing:0;text-transform:none}
+  .big.ink{color:var(--espresso)}
+  .big.ghost{color:transparent;-webkit-text-stroke:1.5px var(--crema);opacity:.55}
+  .eyebrow{font-family:var(--f-display);font-style:italic;font-weight:400;font-variation-settings:"opsz" 24,"SOFT" 50;font-size:clamp(15px,1.3vw,19px);color:var(--espresso);opacity:.75}
+  html[lang="ar"] .eyebrow{font-style:normal}
+
+  /* ---------- Nav ---------- */
+  .nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:22px;padding:18px var(--gutter);
+       mix-blend-mode:multiply;transition:background .4s}
+  .nav.on-dark{mix-blend-mode:normal;color:var(--cream)}
+  .nav .brand img{height:18px;width:auto}
+  .nav .brand .cream{display:none}
+  .nav.on-dark .brand .ink{display:none}
+  .nav.on-dark .brand .cream{display:block}
+  .nav .sep{font-family:var(--f-display);font-weight:300;opacity:.6;font-size:18px}
+  .nav .slash{font-family:var(--f-display);font-weight:400;font-size:17px;letter-spacing:.06em;opacity:.8}
+  .nav ul{list-style:none;display:flex;gap:26px;margin-left:auto;font-size:13.5px;font-weight:500}
+  .nav ul a{opacity:.8}.nav ul a:hover{opacity:1}
+  .nav .pill{border:1.5px solid currentColor;border-radius:999px;padding:8px 16px;font-size:13.5px;font-weight:600}
+  .nav .pill.fill{background:var(--espresso);color:var(--cream);border-color:var(--espresso)}
+  .nav.on-dark .pill.fill{background:var(--cream);color:var(--night);border-color:var(--cream)}
+  .nav .lang{font-family:"Reem Kufi",sans-serif;font-weight:600;font-size:17px;padding:4px 10px;line-height:1}
+  @media (max-width:860px){.nav ul{display:none}.nav{gap:12px}}
+
+  /* ---------- Scenes ---------- */
+  .pin{position:relative;height:calc(100vh * (1 + var(--len,1.5)));z-index:1}
+  .scene{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+  .scene .fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .scene .copy{position:absolute;z-index:4;max-width:34ch}
+  .scene .copy p{font-size:clamp(14px,1.15vw,17px);opacity:.85}
+  .scene .copy h3{font-family:var(--f-display);font-weight:600;font-variation-settings:"opsz" 48,"SOFT" 60;font-size:clamp(22px,2vw,30px);line-height:1.1;margin:8px 0 12px}
+  .cta{display:inline-flex;align-items:center;gap:10px;background:var(--espresso);color:var(--cream);border-radius:999px;padding:12px 22px;font-size:14px;font-weight:600;margin-top:18px;transition:transform .35s var(--ease)}
+  .cta:hover{transform:translateY(-2px)}
+  .cta .arr{display:inline-block;width:34px;height:1.5px;background:currentColor;position:relative}
+  .cta .arr::after{content:"";position:absolute;right:0;top:-4px;width:8px;height:8px;border:1.5px solid currentColor;border-left:0;border-bottom:0;transform:rotate(45deg)}
+  html[dir="rtl"] .cta .arr{transform:scaleX(-1)}
+  .spacer{height:1px}
+
+  /* 01 — FIND YOUR BAKE */
+  #find{display:grid;place-items:start center;padding-top:13vh}
+  #find .title{position:relative;z-index:5;text-align:center;display:grid;gap:.02em}
+  #find .title .l1{font-size:clamp(56px,11vw,160px)}
+  #find .title .l2{font-size:clamp(44px,8.6vw,124px);display:flex;align-items:center;justify-content:center;gap:.18em}
+  #find .title .l2 .star{font-size:.42em;color:var(--espresso);font-weight:400;transform:translateY(-.1em)}
+  #find .title .l3{font-size:clamp(56px,11vw,160px)}
+  #find .hero-img{position:absolute;z-index:4;left:50%;bottom:-6vh;width:clamp(280px,36vw,540px);transform:translateX(-50%);filter:drop-shadow(0 40px 50px rgba(59,36,23,.35))}
+  #find .cta-wrap{position:relative;z-index:5;margin-top:22px}
+  @media (max-width:760px){#find{padding-top:35vh}#find .hero-img{width:74vw;bottom:-3vh}}
+  .card{position:absolute;z-index:2;width:clamp(120px,13vw,190px);background:rgba(255,250,240,.9);border-radius:14px;padding:12px;box-shadow:0 20px 40px rgba(59,36,23,.14),0 1px 0 rgba(255,255,255,.7) inset;will-change:transform}
+  .card .tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;font-weight:600}
+  .card img{height:clamp(70px,8vw,110px);width:100%;object-fit:contain;margin:6px 0 8px}
+  .card b{display:block;font-family:var(--f-display);font-weight:600;font-variation-settings:"opsz" 24,"SOFT" 60;font-size:15px;line-height:1.1}
+  .card small{display:block;font-size:11.5px;opacity:.65;margin-top:3px}
+  .card .mini{display:inline-block;margin-top:8px;border:1px solid var(--espresso);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:600}
+  .card.c1{left:7vw;top:22vh}.card.c2{left:19vw;top:48vh}.card.c3{right:7vw;top:24vh}.card.c4{right:18vw;top:52vh}
+  @media (max-width:760px){.card{width:104px;padding:8px}.card.c1{left:4vw;top:9vh}.card.c3{right:4vw;top:11vh}.card.c2,.card.c4{display:none}}
+  .find-dots{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:5}
+  .find-dots i{width:5px;height:5px;border-radius:50%;background:var(--espresso);opacity:.25}.find-dots i:first-child{opacity:1}
+
+
+  /* 01b — GRIND */
+  #grind .word{position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-54%);font-size:clamp(80px,18vw,290px);display:flex}
+  #grind .word span{display:inline-block;will-change:transform}
+  #grind .word2{position:absolute;z-index:1;right:var(--gutter);top:13vh;font-size:clamp(44px,7vw,110px)}
+  .grinder{position:absolute;z-index:3;left:50%;top:56%;width:clamp(120px,14vw,200px);aspect-ratio:179/501;transform:translate(-50%,-50%)}
+  .grinder .gp{position:absolute;left:0;width:100%;will-change:transform;filter:drop-shadow(0 18px 24px rgba(59,36,23,.3))}
+  .grinder .lid{top:0}.grinder .hopper{top:4.59%}.grinder .collar{top:32.34%}.grinder .body{top:37.52%}
+  #grind .tagline{position:absolute;z-index:5;opacity:0;display:grid;gap:4px;will-change:transform,opacity}
+  #grind .tagline b{font-family:var(--f-display);font-weight:600;font-variation-settings:"opsz" 24,"SOFT" 60;font-size:clamp(14px,1.3vw,19px);white-space:nowrap}
+  #grind .tagline small{font-size:12px;opacity:.65;white-space:nowrap}
+  #grind .tagline::before{content:"";position:absolute;width:var(--len,120px);height:1px;background:var(--espresso);opacity:.45;top:50%;transform-origin:left center;transform:rotate(var(--ang,0deg));left:var(--ox,-10px)}
+  #grind .tagline::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:var(--espresso);top:calc(50% - 3px);left:calc(var(--ox,-10px) - 3px)}
+  #grind .tl1{left:calc(50% + 14vw);top:34%}
+  #grind .tl2{right:calc(50% + 14vw);top:58%;text-align:right}
+  #grind .copy{left:var(--gutter);bottom:10vh;max-width:30ch}
+  @media (max-width:760px){#grind .word{font-size:24vw;top:40%}#grind .word2{top:9vh}.grinder{width:36vw;top:46%}#grind .tagline{display:none}#grind .copy{bottom:6vh;max-width:88vw}}
+
+  /* 01c — POUR (coffee) */
+  #brew .fx{z-index:5}   /* the stream is drawn over the glass, so the part inside the carafe shows through */
+  #brew .word{position:absolute;z-index:1;left:var(--gutter);top:16vh;font-size:clamp(70px,15vw,230px)}
+  #brew .echo{position:absolute;z-index:1;left:var(--gutter);top:calc(16vh + .78em);font-size:clamp(70px,15vw,230px);letter-spacing:.06em;transform:scaleY(1.25);transform-origin:top left;will-change:transform,opacity;color:var(--crema);opacity:.9}
+  #brew .kettle{position:absolute;z-index:4;right:16vw;top:5vh;width:clamp(220px,28vw,400px);transform-origin:62% 70%;will-change:transform;filter:drop-shadow(0 30px 40px rgba(59,36,23,.3))}
+  #brew .dripper{position:absolute;z-index:3;left:50%;bottom:4vh;width:clamp(200px,22vw,320px);transform:translateX(-50%);filter:drop-shadow(0 30px 40px rgba(59,36,23,.3))}
+  #brew .copy{right:var(--gutter);bottom:12vh;max-width:30ch;text-align:right}
+  html[dir="rtl"] #brew .copy{text-align:left}
+  #brew .tick{position:absolute;z-index:4;left:var(--gutter);bottom:12vh;display:grid;gap:6px;font-size:12.5px;opacity:.75}
+  #brew .tick b{font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1}
+  @media (max-width:760px){#brew .word,#brew .echo{font-size:17vw}#brew .kettle{width:50vw;right:4vw;top:12vh}#brew .dripper{width:40vw;left:40%;bottom:30vh}#brew .copy p{display:none}#brew .copy{bottom:6vh;max-width:88vw;left:var(--gutter);right:auto;text-align:left}#brew .tick{display:none}}
+  html[dir="rtl"] #grind .copy{left:auto;right:var(--gutter)}
+  html[dir="rtl"] #grind .word2{right:auto;left:var(--gutter)}
+  html[dir="rtl"] #brew .word,html[dir="rtl"] #brew .echo{left:auto;right:var(--gutter);transform-origin:top right}
+  html[dir="rtl"] #brew .copy{right:auto;left:var(--gutter)}
+  html[dir="rtl"] #brew .tick{left:auto;right:var(--gutter)}
+  html[dir="rtl"] #brew .kettle{right:auto;left:8vw;transform:scaleX(-1)}
+
+  /* SIP: the espresso cup rides the wave */
+  #sip .cup{position:absolute;z-index:3;left:50%;bottom:-4vh;width:clamp(220px,26vw,380px);transform:translateX(-50%) translateY(60vh);will-change:transform;filter:drop-shadow(0 30px 40px rgba(0,0,0,.45))}
+  @media (max-width:760px){#sip .cup{width:60vw;bottom:38vh}}
+  /* 02 — ROLL */
+  #roll .word{position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-54%);font-size:clamp(90px,21vw,330px);display:flex;gap:0}
+  #roll .word span{display:inline-block;will-change:transform}
+  #roll .word2{position:absolute;z-index:1;right:var(--gutter);top:14vh;font-size:clamp(44px,7vw,110px)}
+  #roll .prod{position:absolute;z-index:3;left:50%;top:52%;width:clamp(240px,34vw,500px);transform:translate(-50%,-50%);filter:drop-shadow(0 30px 40px rgba(59,36,23,.3));will-change:transform}
+  #roll .copy{left:var(--gutter);bottom:10vh;max-width:30ch}
+  #roll .side{position:absolute;right:var(--gutter);bottom:12vh;z-index:4;text-align:right;font-size:13px;opacity:.7;display:grid;gap:4px}
+  html[dir="rtl"] #roll .side{text-align:left}
+  #roll .side .line{width:120px;height:1px;background:var(--espresso);opacity:.5;margin:8px 0 8px auto}
+  html[dir="rtl"] #roll .side .line{margin:8px auto 8px 0}
+  @media (max-width:760px){#roll .word{top:36%}#roll .word2{top:9vh}#roll .prod{top:48%;width:68vw}#roll .copy{bottom:7vh;max-width:90vw}#roll .side{display:none}}
+
+  /* 03 — DAMASCENE (exploded) */
+  #dam .word{position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);font-size:clamp(54px,13.5vw,210px);white-space:nowrap}
+  #dam .cluster{position:absolute;z-index:3;left:50%;top:50%;width:clamp(230px,30vw,440px);transform:translate(-50%,-50%);filter:drop-shadow(0 28px 36px rgba(59,36,23,.28))}
+  #dam .part{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);will-change:transform;filter:drop-shadow(0 14px 18px rgba(59,36,23,.25))}
+  #dam .part.cookie{width:clamp(80px,9vw,130px)}
+  #dam .part.bud{width:clamp(40px,4vw,60px)}
+  #dam .part.petals{width:clamp(50px,5.5vw,84px)}
+  #dam .tagline{position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);will-change:transform,opacity;opacity:0;display:grid;gap:4px}
+  #dam .tagline b{font-family:var(--f-display);font-weight:600;font-variation-settings:"opsz" 24,"SOFT" 60;font-size:clamp(14px,1.3vw,19px);white-space:nowrap}
+  #dam .tagline small{font-size:12px;opacity:.65;white-space:nowrap}
+  #dam .tagline::before{content:"";position:absolute;width:var(--len,120px);height:1px;background:var(--espresso);opacity:.45;top:50%;transform-origin:left center;transform:rotate(var(--ang,0deg));left:var(--ox,-10px)}
+  #dam .tagline::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:var(--espresso);top:calc(50% - 3px);left:calc(var(--ox,-10px) - 3px)}
+  #dam .copy{left:var(--gutter);top:14vh;max-width:28ch}
+  #dam .ribbon{position:absolute;z-index:5;right:var(--gutter);bottom:10vh;display:flex;gap:10px;align-items:center;font-size:12.5px;opacity:.75}
+  #dam .ribbon i{width:36px;height:36px;border-radius:50%;border:1px solid var(--espresso);display:grid;place-items:center;font-style:normal;font-family:var(--f-display)}
+  @media (max-width:760px){#dam .word{font-size:17vw;top:46%}#dam .cluster{width:62vw}#dam .copy{top:11vh;max-width:88vw}#dam .tagline b{font-size:12px}#dam .tagline small{display:none}#dam .ribbon{display:none}}
+
+  /* 04 — POUR */
+  #pour .word{position:absolute;z-index:1;left:var(--gutter);top:16vh;font-size:clamp(70px,15vw,230px)}
+  #pour .echo{position:absolute;z-index:1;left:var(--gutter);top:calc(16vh + .78em);font-size:clamp(70px,15vw,230px);letter-spacing:.06em;transform:scaleY(1.25);transform-origin:top left;will-change:transform,opacity;color:var(--crema);opacity:.9;font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1}
+  #pour .eyebrow.pos{position:absolute;z-index:2;left:var(--gutter);top:11vh}
+  #pour .cup{position:absolute;z-index:3;left:50%;bottom:-4vh;width:clamp(220px,24vw,360px);transform:translateX(-30%);filter:drop-shadow(0 30px 40px rgba(59,36,23,.3))}
+  #pour .copy{right:var(--gutter);bottom:12vh;max-width:30ch;text-align:right}
+  html[dir="rtl"] #pour .copy{text-align:left}
+  #pour .tick{position:absolute;z-index:4;left:var(--gutter);bottom:12vh;display:grid;gap:6px;font-size:12.5px;opacity:.75}
+  #pour .tick b{font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1}
+  @media (max-width:760px){#pour .word,#pour .echo{font-size:17vw}#pour .cup{width:58vw;transform:translateX(-50%)}#pour .copy{bottom:8vh;max-width:88vw;left:var(--gutter);right:auto;text-align:left}#pour .tick{display:none}}
+
+  /* 05 — SIP (the wave) */
+  #sip{background:var(--cream)}
+  #sip .wave{position:absolute;inset:0;z-index:2}
+  #sip .top{position:absolute;z-index:1;inset:0;display:grid;place-items:center}
+  #sip .top .drip{font-size:clamp(60px,12vw,190px);opacity:.25}
+  #sip .night{position:absolute;inset:0;z-index:3;color:var(--cream);opacity:0;display:grid;grid-template-columns:1fr 1fr;align-items:end;padding:0 var(--gutter) 9vh}
+  #sip .night .big{color:var(--cream);font-size:clamp(90px,22vw,340px);line-height:.8}
+  #sip .night .big.ghost{color:transparent;-webkit-text-stroke:1.5px rgba(236,223,200,.55);position:absolute;left:var(--gutter);bottom:calc(9vh + .72em);opacity:1}
+  #sip .night .info{display:grid;gap:14px;justify-items:end;text-align:right;max-width:38ch;justify-self:end}
+  html[dir="rtl"] #sip .night .info{justify-items:start;text-align:left}
+  #sip .night .info .hrs{font-family:var(--f-display);font-weight:600;font-size:clamp(20px,2.2vw,32px);line-height:1.1}
+  #sip .night .info p{font-size:14px;opacity:.8}
+  #sip .night .cta{background:var(--cream);color:var(--night)}
+  #sip .night .store{position:absolute;right:var(--gutter);top:12vh;width:clamp(160px,20vw,300px);aspect-ratio:16/9;object-fit:cover;border-radius:10px;opacity:.55;filter:saturate(.6)}
+  html[dir="rtl"] #sip .night .store{right:auto;left:var(--gutter)}
+  @media (max-width:760px){#sip .night{grid-template-columns:1fr;align-content:end;gap:22px}#sip .night .info{justify-items:start;text-align:left}#sip .night .store{display:none}}
+
+  /* ---------- Menu + footer (normal flow) ---------- */
+  .menu{position:relative;z-index:1;background:var(--night);color:var(--cream);padding:14vh var(--gutter) 12vh}
+  .menu .teaser{display:grid;grid-template-columns:1.2fr 1fr;gap:40px 8vw;align-items:end}
+  .menu .eyebrow{color:var(--cream)}
+  .menu h2{font-family:var(--f-display);font-weight:900;font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;font-size:clamp(56px,10vw,160px);line-height:.9;letter-spacing:-.02em;color:var(--latte);text-transform:uppercase;margin:8px 0 18px}
+  html[lang="ar"] .menu h2{font-weight:700;letter-spacing:0;text-transform:none;line-height:1.05}
+  .menu p{max-width:40ch;opacity:.8;font-size:15px;margin-bottom:24px}
+  .menu .cta{background:var(--cream);color:var(--night)}
+  .teaser-list{list-style:none;display:grid}
+  .teaser-list li{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0;border-top:1px solid rgba(236,223,200,.16);font-family:var(--f-display);font-weight:600;font-variation-settings:"opsz" 36,"SOFT" 60;font-size:clamp(20px,2vw,28px)}
+  .teaser-list li:last-child{border-bottom:1px solid rgba(236,223,200,.16)}
+  .teaser-list small{font-family:var(--f-body);font-size:12px;opacity:.5;letter-spacing:.1em}
+  @media (max-width:760px){.menu .teaser{grid-template-columns:1fr}}
+  footer{position:relative;z-index:1;background:var(--night);color:var(--cream);padding:0 var(--gutter) 40px;border-top:1px solid rgba(236,223,200,.14)}
+  footer .row{display:flex;flex-wrap:wrap;gap:18px 40px;align-items:center;padding-top:28px;font-size:13px;opacity:.75}
+  footer .row img{height:16px;width:auto}
+  footer .row .r{margin-left:auto}
+  html[dir="rtl"] footer .row .r{margin-left:0;margin-right:auto}
+
+  /* ---------- RTL mirroring for the absolute scenes ---------- */
+    html[dir="rtl"] #roll .word2{right:auto;left:var(--gutter)}
+  html[dir="rtl"] #roll .copy{left:auto;right:var(--gutter)}
+  html[dir="rtl"] #roll .side{right:auto;left:var(--gutter)}
+  html[dir="rtl"] #dam .copy{left:auto;right:var(--gutter)}
+  html[dir="rtl"] #dam .ribbon{right:auto;left:var(--gutter)}
+  html[dir="rtl"] #pour .word,html[dir="rtl"] #pour .echo,html[dir="rtl"] #pour .eyebrow.pos{left:auto;right:var(--gutter);transform-origin:top right}
+  html[dir="rtl"] #pour .copy{right:auto;left:var(--gutter)}
+  html[dir="rtl"] #pour .tick{left:auto;right:var(--gutter)}
+  html[dir="rtl"] #pour .cup{transform:translateX(-70%)}
+  html[dir="rtl"] #sip .night .big.ghost{left:auto;right:var(--gutter)}
+
+  /* ---------- Reduced motion: every scene is a still ---------- */
+  @media (prefers-reduced-motion:reduce){
+    .pin{height:auto}.scene{position:relative;height:auto;min-height:100vh}
+    .scene .fx{display:none}
+    #sip .top{display:none}#sip .night{opacity:1;position:relative;padding-top:14vh;background:var(--night)}
+    #dam .tagline{opacity:1}
+  }
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav" aria-label="Main">
+  <a class="brand" href="#find" aria-label="NASH home">
+    <img class="ink" src="assets/nash-ink.png" alt="NASH">
+    <img class="cream" src="assets/nash-cream.png" alt="">
+  </a>
+  <span class="sep" aria-hidden="true">/</span>
+  <span class="slash" data-i18n="nav.play">BAKE</span>
+  <ul>
+    <li><a href="#grind" data-i18n="nav.espresso">Espresso</a></li>
+    <li><a href="#roll" data-i18n="nav.rolls">Rolls</a></li>
+    <li><a href="#dam" data-i18n="nav.damascene">Damascene</a></li>
+    <li><a href="#pour" data-i18n="nav.matcha">Matcha</a></li>
+    <li><a href="menu.html" data-i18n="nav.menu">Menu</a></li>
+    <li><a href="#sip" data-i18n="nav.visit">Visit</a></li>
+  </ul>
+  <button class="lang" id="lang" aria-label="Switch language">عربي</button>
+  <a class="pill fill" href="menu.html" data-i18n="nav.order">Order</a>
+</nav>
+
+<!-- 01 · FIND YOUR BAKE -->
+<div class="pin" style="--len:1.2"><section class="scene" id="find" aria-label="Find your bake">
+  <div class="title">
+    <div class="big l1" data-i18n="find.l1">Find</div>
+    <div class="big l2"><span data-i18n="find.l2a">your</span><span class="star" aria-hidden="true">✦</span><span data-i18n="find.l2b">NASH</span></div>
+    <div class="big l3" data-i18n="find.l3">Bake</div>
+    <div class="cta-wrap"><a class="cta" href="menu.html"><span data-i18n="find.cta">Explore the menu</span><i class="arr"></i></a></div>
+  </div>
+  <img class="hero-img" id="heroImg" src="assets/cheesecake.webp" alt="Basque cheesecake with lavender cream">
+
+  <article class="card c1" data-depth="1.2"><div class="tag" data-i18n="find.k1">Warm</div><img src="assets/roll.webp" alt=""><b data-i18n="find.c1">Cinnamon Bliss</b><small data-i18n="find.c1s">Cream-cheese glaze, toasted walnut</small><span class="mini" data-i18n="find.add">Add</span></article>
+  <article class="card c2" data-depth=".7"><div class="tag" data-i18n="find.k2">Syria</div><img src="assets/cookies.webp" alt=""><b data-i18n="find.c2">The Damascene</b><small data-i18n="find.c2s">Rose, pistachio, white chocolate</small><span class="mini" data-i18n="find.add">Add</span></article>
+  <article class="card c3" data-depth="1"><div class="tag" data-i18n="find.k3">Iced</div><img src="assets/matcha.webp" alt=""><b data-i18n="find.c3">Strawberry Foam Matcha</b><small data-i18n="find.c3s">Layered, silky, seasonal</small><span class="mini" data-i18n="find.add">Add</span></article>
+  <article class="card c4" data-depth=".85"><div class="tag" data-i18n="find.k4">Signature</div><img src="assets/cookie.webp" alt=""><b data-i18n="find.c4">Rose &amp; Pistachio</b><small data-i18n="find.c4s">Syria, in one bite</small><span class="mini" data-i18n="find.add">Add</span></article>
+  <div class="find-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+</section></div>
+
+<!-- 01b · GRIND — beans fall into the grinder, then it comes apart -->
+<div class="pin" style="--len:1.9"><section class="scene" id="grind" aria-label="The espresso: grind">
+  <canvas class="fx" id="fxGrind" aria-hidden="true"></canvas>
+  <div class="big word" id="grindWord" aria-label="Grind"><span>G</span><span>R</span><span>I</span><span>N</span><span>D</span></div>
+  <div class="big ghost word2" data-i18n="grind.w2" aria-hidden="true">Fresh</div>
+  <div class="grinder" id="grinder" aria-label="Coffee grinder">
+    <img class="gp lid" data-dy="-1.6" data-dx="-.18" data-r="-14" src="assets/coffee/grinder-lid.webp" alt="">
+    <img class="gp hopper" data-dy="-.95" data-dx=".12" data-r="6" src="assets/coffee/grinder-hopper.webp" alt="">
+    <img class="gp collar" data-dy="-.42" data-dx="-.08" data-r="-4" src="assets/coffee/grinder-collar.webp" alt="">
+    <img class="gp body" data-dy=".06" data-dx="0" data-r="0" src="assets/coffee/grinder-body.webp" alt="">
+  </div>
+  <div class="tagline tl1" style="--len:120px;--ox:-120px"><b data-i18n="grind.t1">Fresh beans, every shot</b><small data-i18n="grind.t1s">Whole beans in, never pre-ground</small></div>
+  <div class="tagline tl2" style="--len:110px;--ox:110%;--ang:180deg"><b data-i18n="grind.t2">Burrs, not blades</b><small data-i18n="grind.t2s">An even grind is the whole secret</small></div>
+  <div class="copy">
+    <div class="eyebrow" data-i18n="grind.eyebrow">№ 00 — The Espresso</div>
+    <h3 data-i18n="grind.title">Ground fresh for every cup.</h3>
+    <p data-i18n="grind.body">Every shot starts as whole beans. Ground the moment you order, dosed by hand, pulled with care.</p>
+  </div>
+</section></div>
+
+<!-- 01c · POUR — the kettle pours, the carafe fills -->
+<div class="pin" style="--len:1.9"><section class="scene" id="brew" aria-label="The espresso: pour">
+  <canvas class="fx" id="fxBrew" aria-hidden="true"></canvas>
+  <div class="big word" data-i18n="brew.word">Pour</div>
+  <div class="big echo" id="brewEcho" aria-hidden="true" data-i18n="brew.echo">Slow</div>
+  <img class="kettle" id="kettle" src="assets/coffee/kettle.webp" alt="Gooseneck kettle">
+  <img class="dripper" id="dripper" src="assets/coffee/carafe.webp" alt="Glass coffee carafe">
+  <div class="tick" aria-hidden="true"><b id="brewPct">0 ml</b><span data-i18n="brew.tick">brewed</span></div>
+  <div class="copy">
+    <h3 data-i18n="brew.title">A shot with a signature taste.</h3>
+    <p data-i18n="brew.body">Bold, round and unmistakably ours, finished with a thick golden crema. The quiet heart of NASH, and an espresso people cross the city for.</p>
+    <a class="cta" href="menu.html"><span data-i18n="brew.cta">See the coffee</span><i class="arr"></i></a>
+  </div>
+</section></div>
+
+<!-- 02 · ROLL -->
+<div class="pin" style="--len:1.6"><section class="scene" id="roll" aria-label="Cinnamon rolls">
+  <canvas class="fx" id="fxRoll" aria-hidden="true"></canvas>
+  <div class="big word" aria-label="Roll" id="rollWord"><span>R</span><span>O</span><span>L</span><span>L</span></div>
+  <div class="big ghost word2" data-i18n="roll.w2" aria-hidden="true">Warm</div>
+  <img class="prod" id="rollImg" src="assets/roll.webp" alt="Cinnamon roll with cream cheese glaze">
+  <div class="copy">
+    <div class="eyebrow" data-i18n="roll.eyebrow">№ 01 — The one that started it all</div>
+    <h3 data-i18n="roll.title">Cinnamon Bliss.</h3>
+    <p data-i18n="roll.body">Pillowy roll, swathed in cream cheese glaze and finished with toasted walnuts. Served warm, right up to midnight.</p>
+    <a class="cta" href="menu.html"><span data-i18n="roll.cta">Order now</span><i class="arr"></i></a>
+  </div>
+  <div class="side" aria-hidden="true"><span data-i18n="roll.s1">Ceylon cinnamon</span><span class="line"></span><span data-i18n="roll.s2">Real butter</span><span class="line"></span><span data-i18n="roll.s3">Baked at 10, 2 and 8</span></div>
+</section></div>
+
+<!-- 03 · DAMASCENE, exploded -->
+<div class="pin" style="--len:1.8"><section class="scene" id="dam" aria-label="The Damascene cookie, taken apart">
+  <canvas class="fx" id="fxDam" aria-hidden="true"></canvas>
+  <div class="big word" aria-hidden="true" data-i18n="dam.word">Damascene</div>
+  <img class="cluster" id="damCluster" src="assets/cookies.webp" alt="Damascene cookies with dried rose petals">
+  <img class="part cookie" data-x="-.34" data-y="-.22" data-r="-28" src="assets/cookie.webp" alt="">
+  <img class="part bud" data-x=".36" data-y="-.26" data-r="35" src="assets/rosebud.webp" alt="">
+  <img class="part petals" data-x=".3" data-y=".26" data-r="-18" src="assets/petals.webp" alt="">
+  <img class="part bud" data-x="-.3" data-y=".3" data-r="60" src="assets/rosebud.webp" alt="">
+  <div class="tagline" data-x="-.46" data-y="-.08" style="--len:110px;--ox:110%;--ang:180deg"><b data-i18n="dam.i1">White chocolate</b><small data-i18n="dam.i1s">Folded in, never melted through</small></div>
+  <div class="tagline" data-x=".44" data-y="-.02" style="--len:120px;--ox:-120px"><b data-i18n="dam.i2">Aleppo pistachio</b><small data-i18n="dam.i2s">Roasted, roughly chopped</small></div>
+  <div class="tagline" data-x=".1" data-y=".42" style="--len:60px;--ox:-60px"><b data-i18n="dam.i3">Damascene rose</b><small data-i18n="dam.i3s">Dried petals from the city it is named after</small></div>
+  <div class="copy">
+    <div class="eyebrow" data-i18n="dam.eyebrow">№ 02 — A cookie born from a craving</div>
+    <h3 data-i18n="dam.title">The Damascene.</h3>
+    <p data-i18n="dam.body">It started with a craving our founder, Dania Ayoubi, couldn't satisfy anywhere. So she tested in her own kitchen, batch by batch, until Syria had its own place on the menu.</p>
+  </div>
+  <div class="ribbon" aria-hidden="true"><i>03</i><span data-i18n="dam.ribbon">Three ingredients. One city.</span></div>
+</section></div>
+
+<!-- 04 · POUR -->
+<div class="pin" style="--len:1.6"><section class="scene" id="pour" aria-label="The matcha bar">
+  <canvas class="fx" id="fxPour" aria-hidden="true"></canvas>
+  <div class="eyebrow pos" data-i18n="pour.eyebrow">№ 03 — The Matcha Bar</div>
+  <div class="big word" data-i18n="pour.word">Pour</div>
+  <div class="big echo" id="pourEcho" aria-hidden="true" data-i18n="pour.echo">Matcha</div>
+  <img class="cup" id="cup" src="assets/matcha.webp" alt="Strawberry foam matcha in a NASH cup">
+  <div class="tick" aria-hidden="true"><b id="pourPct">0%</b><span data-i18n="pour.tick">poured</span></div>
+  <div class="copy">
+    <h3 data-i18n="pour.title">Strawberry Foam Matcha.</h3>
+    <p data-i18n="pour.body">Layered iced drinks, silky lattes and a seasonal creation that changes with the mood. Poured slow, so the layers hold.</p>
+    <a class="cta" href="menu.html"><span data-i18n="pour.cta">See the drinks</span><i class="arr"></i></a>
+  </div>
+</section></div>
+
+<!-- 05 · SIP, the wave -->
+<div class="pin" style="--len:1.6"><section class="scene" id="sip" aria-label="Open till midnight">
+  <div class="top" aria-hidden="true"><div class="big ghost drip" data-i18n="sip.drip">drip, drip</div></div>
+  <canvas class="fx wave" id="fxSip" aria-hidden="true"></canvas>
+  <div class="night" id="night">
+    <img class="store" src="assets/storefront.webp" alt="">
+    <img class="cup" id="sipCup" src="assets/coffee/cup.webp" alt="Espresso with golden crema">
+    <div class="big ghost" aria-hidden="true" data-i18n="sip.word">Sip</div>
+    <div class="big" data-i18n="sip.word">Sip</div>
+    <div class="info">
+      <div class="eyebrow" style="color:var(--cream)" data-i18n="sip.eyebrow">№ 04 — We never close early</div>
+      <div class="hrs" data-i18n="sip.hrs">Open till midnight.<br>10AM — 12AM, every day.</div>
+      <p data-i18n="sip.body">A late-night craving or a quiet moment to yourself: fresh bakes, warm rolls and a proper espresso until the clock strikes twelve. Damascus, Syria.</p>
+      <a class="cta" href="menu.html"><span data-i18n="sip.cta">NASH, at your door</span><i class="arr"></i></a>
+    </div>
+  </div>
+</section></div>
+
+<!-- Menu teaser: the full menu lives on menu.html (the helix from the original site) -->
+<section class="menu" id="menu" aria-label="Menu">
+  <div class="teaser">
+    <div>
+      <div class="eyebrow" data-i18n="menu.e">What we bake</div>
+      <h2 data-i18n="menu.title">The Menu</h2>
+      <p data-i18n="menu.lead">Nineteen things we bake and pour, every day from 10AM until midnight. Coffee, cookies, cinnamon rolls, cakes, matcha and drinks.</p>
+      <a class="cta" href="menu.html"><span data-i18n="menu.cta">Open the full menu</span><i class="arr"></i></a>
+    </div>
+    <ul class="teaser-list" aria-label="Categories">
+      <li><span data-i18n="menu.k.coffee">Coffee</span><small>02</small></li>
+      <li><span data-i18n="menu.k.cookies">Cookies</span><small>06</small></li>
+      <li><span data-i18n="menu.k.rolls">Cinnamon rolls</span><small>03</small></li>
+      <li><span data-i18n="menu.k.cakes">Cakes</span><small>05</small></li>
+      <li><span data-i18n="menu.k.drinks">Matcha &amp; drinks</span><small>03</small></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="row">
+    <img src="assets/nash-cream.png" alt="NASH">
+    <span data-i18n="foot.line">Artisanal bakery · Damascus · Est. 2018</span>
+    <span class="r" data-i18n="foot.made">Scroll story remixed from the NASH site, after the POUR / PLAY reel.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+"use strict";
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const params = new URLSearchParams(location.search);
+const CAPTURE = params.has("capture");
+
+/* ================================================================
+ * Arabic copy. English lives in the HTML, so it is the fallback.
+ * ================================================================ */
+const AR = {
+  "nav.play":"اخبز", "nav.rolls":"اللفائف", "nav.damascene":"الدمشقية", "nav.matcha":"الماتشا", "nav.menu":"القائمة", "nav.visit":"زورونا", "nav.order":"اطلب الآن",
+  "find.l1":"اختر", "find.l2a":"خَبزتك", "find.l2b":"من NASH", "find.l3":"المفضّلة", "find.cta":"اكتشف القائمة", "find.add":"أضف",
+  "find.k1":"دافئ", "find.c1":"سينامون بليس", "find.c1s":"كريمة الجبن وجوز محمّص",
+  "find.k2":"سوريا", "find.c2":"الدمشقية", "find.c2s":"ورد، فستق، شوكولا بيضاء",
+  "find.k3":"مثلّج", "find.c3":"ماتشا رغوة الفراولة", "find.c3s":"طبقات ناعمة، موسمية",
+  "find.k4":"التوقيع", "find.c4":"ورد وفستق", "find.c4s":"سوريا في قضمة واحدة",
+  "nav.espresso":"الإسبريسو",
+  "grind.w2":"طازج", "grind.eyebrow":"٠٠ — الإسبريسو", "grind.title":"يُطحن طازجاً لكل فنجان.", "grind.body":"كل شوت يبدأ من حبوب كاملة. تُطحن لحظة الطلب، وتُوزن باليد، وتُحضَّر بعناية.",
+  "grind.t1":"حبوب طازجة لكل شوت", "grind.t1s":"حبوب كاملة، لا مطحونة مسبقاً", "grind.t2":"مطاحن مخروطية لا شفرات", "grind.t2s":"الطحن المتساوي هو السر كله",
+  "brew.word":"اسكب", "brew.echo":"بهدوء", "brew.tick":"مُحضَّر", "brew.title":"شوت بطعمٍ لا يُشبه غيره.", "brew.body":"جريء، متوازن، ومميّز، ويُختم بكريما ذهبية كثيفة. القلب الهادئ لـ NASH، وإسبريسو يستحق المشوار.", "brew.cta":"شاهد القهوة",
+  "roll.w2":"دافئة", "roll.eyebrow":"٠١ — التي بدأ منها كل شيء", "roll.title":"سينامون بليس.", "roll.body":"لفّة طرية مغمورة بكريمة الجبن ومزيّنة بالجوز المحمّص. تُقدَّم دافئة حتى منتصف الليل.", "roll.cta":"اطلب الآن",
+  "roll.s1":"قرفة سيلانية", "roll.s2":"زبدة حقيقية", "roll.s3":"تُخبز الساعة ١٠ و٢ و٨",
+  "dam.word":"الدمشقية", "dam.eyebrow":"٠٢ — كوكيز وُلدت من اشتياق", "dam.title":"الدمشقية.", "dam.body":"بدأت الحكاية باشتياقٍ لنكهة لم تجدها مؤسِّستنا دانيا الأيوبي في أي مكان، فبدأت التجربة في مطبخها دفعةً بعد دفعة، حتى صار لسوريا مكانها الخاص في القائمة.",
+  "dam.i1":"شوكولا بيضاء", "dam.i1s":"تُطوى في العجين ولا تذوب", "dam.i2":"فستق حلبي", "dam.i2s":"محمّص ومكسّر", "dam.i3":"ورد دمشقي", "dam.i3s":"بتلات مجففة من المدينة التي سُمّيت باسمها", "dam.ribbon":"ثلاثة مكوّنات. مدينة واحدة.",
+  "pour.eyebrow":"٠٣ — بار الماتشا", "pour.word":"اسكب", "pour.echo":"ماتشا", "pour.tick":"مسكوب", "pour.title":"ماتشا رغوة الفراولة.", "pour.body":"مشروبات مثلّجة بطبقات، لاتيه ناعم، وابتكار موسمي يتغيّر مع المزاج. تُسكب ببطء لتبقى الطبقات.", "pour.cta":"شاهد المشروبات",
+  "sip.drip":"نقطة، نقطة", "sip.word":"ارتشف", "sip.eyebrow":"٠٤ — لا نُغلق مبكراً أبداً", "sip.hrs":"مفتوح حتى منتصف الليل.<br>١٠ صباحاً — ١٢ ليلاً، كل يوم.", "sip.body":"اشتياقٌ متأخر أو لحظة هدوء لنفسك: مخبوزات طازجة ولفائف دافئة وإسبريسو حقيقي حتى تدقّ الساعة الثانية عشرة. دمشق، سوريا.", "sip.cta":"NASH إلى بابك",
+  "menu.e":"ماذا نخبز", "menu.title":"القائمة", "menu.lead":"تسعة عشر صنفاً نخبزها ونسكبها، كل يوم من ١٠ صباحاً حتى منتصف الليل. قهوة، كوكيز، لفائف قرفة، كيك، ماتشا ومشروبات.", "menu.cta":"افتح القائمة كاملة",
+  "menu.k.coffee":"قهوة", "menu.k.rolls":"لفائف القرفة", "menu.k.cookies":"كوكيز", "menu.k.cakes":"كيك", "menu.k.drinks":"ماتشا ومشروبات",
+  "foot.line":"مخبز حِرفي · دمشق · تأسس ٢٠١٨", "foot.made":"قصة تمرير معاد مزجها من موقع NASH، على طريقة ريل POUR / PLAY."
+};
+const EN = {};
+document.querySelectorAll("[data-i18n]").forEach(el => { EN[el.dataset.i18n] ??= el.innerHTML; });
+let lang = "en";
+function setLang(l){
+  lang = l; const dict = l === "ar" ? AR : EN;
+  document.querySelectorAll("[data-i18n]").forEach(el => { const v = dict[el.dataset.i18n]; if (v != null) el.innerHTML = v; });
+  document.documentElement.lang = l; document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
+  document.getElementById("lang").textContent = l === "ar" ? "EN" : "عربي";
+  if (l === "ar") rollWord.innerHTML = "<span>لفّ</span>"; else rollWord.innerHTML = "<span>R</span><span>O</span><span>L</span><span>L</span>";
+  try { localStorage.setItem("nash-lang", l); } catch (e) {}
+
+}
+const rollWord = document.getElementById("rollWord");
+document.getElementById("lang").addEventListener("click", () => setLang(lang === "ar" ? "en" : "ar"));
+try { if (localStorage.getItem("nash-lang") === "ar") setLang("ar"); } catch (e) {}
+
+/* ================================================================
+ * Tiny helpers
+ * ================================================================ */
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+// A canvas that fills its scene, in CSS px, redrawn only while the scene is on screen.
+function makeFx(id, draw){
+  const cv = document.getElementById(id); if (!cv) return null;
+  const ctx = cv.getContext("2d"); let W = 0, H = 0, dpr = 1, on = false, t0 = performance.now(), raf = 0;
+  function size(){ dpr = CAPTURE ? 1 : Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  addEventListener("resize", size); size();
+  const api = { cv, ctx, get W(){ return W }, get H(){ return H }, p: 0, t: 0 };
+  function frame(now){ if (!on) return; api.t = (now - t0) / 1000; ctx.clearRect(0, 0, W, H); draw(api); raf = requestAnimationFrame(frame); }
+  api.start = () => { if (on || CAPTURE) return; on = true; t0 = performance.now() - api.t * 1000; raf = requestAnimationFrame(frame); };
+  api.stop = () => { on = false; cancelAnimationFrame(raf); };
+  api.step = (dt) => { api.t += dt; ctx.clearRect(0, 0, W, H); draw(api); };   // frame-exact capture
+  return api;
+}
+const nav = document.getElementById("nav");
+
+/* ================================================================
+ * 01 · FIND — cards drift with the pointer, then fly out on scroll
+ * ================================================================ */
+const cards = [...document.querySelectorAll("#find .card")];
+let mx = 0, my = 0, tx = 0, ty = 0;
+addEventListener("pointermove", e => { tx = (e.clientX / innerWidth - .5); ty = (e.clientY / innerHeight - .5); }, { passive: true });
+const cardDrift = cards.map(() => ({ ph: rnd() * 6.28, sp: .6 + rnd() * .5 }));
+let findP = 0, findT = 0;
+function tickFind(now){
+  mx = lerp(mx, tx, .06); my = lerp(my, ty, .06); findT = now / 1000;
+  cards.forEach((c, i) => {
+    const d = +c.dataset.depth, k = cardDrift[i];
+    const out = smooth(findP) * (i % 2 ? -1 : 1);   // scroll: fly out left/right
+    const x = -mx * 40 * d + Math.sin(findT * k.sp + k.ph) * 6 + out * (i < 2 ? -1 : 1) * 60 * innerWidth / 100;
+    const y = -my * 30 * d + Math.cos(findT * k.sp * .8 + k.ph) * 5 + smooth(findP) * -120;
+    c.style.transform = `translate(${x}px, ${y}px) rotate(${Math.sin(findT * .7 + k.ph) * 2 + out * 18}deg)`;
+    c.style.opacity = 1 - smooth(findP);
+  });
+  const h = document.getElementById("heroImg");
+  h.style.transform = `translateX(-50%) translate(${-mx * 14}px, ${-my * 8 + smooth(findP) * 120}px) scale(${1 + smooth(findP) * .25})`;
+  h.style.opacity = 1 - smooth(clamp((findP - .55) / .45, 0, 1));
+}
+// (tickFind runs from the main loop below)
+
+
+/* ================================================================
+ * 01b · GRIND — beans fall into the hopper; on scroll the grinder comes
+ * apart and grounds pour from the chute (the reel's exploded grinder)
+ * ================================================================ */
+const beans = Array.from({ length: 70 }, () => ({ x: rnd(), y: rnd(), s: .7 + rnd() * .7, r: rnd() * 6.28, v: .7 + rnd() * .6, w: rnd() * 6.28 }));
+const grounds = Array.from({ length: 260 }, () => ({ x: rnd(), y: rnd(), s: .6 + rnd(), v: .6 + rnd() * .8, r: rnd() * 6.28 }));
+const grinderEl = document.getElementById("grinder"), gparts = [...grinderEl.querySelectorAll(".gp")];
+function drawBean(ctx, x, y, a, s, alpha){
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.globalAlpha = alpha;
+  ctx.fillStyle = "#4a2a16"; ctx.beginPath(); ctx.ellipse(0, 0, 7 * s, 4.6 * s, 0, 0, 6.28); ctx.fill();
+  ctx.strokeStyle = "#2a150a"; ctx.lineWidth = 1.2 * s; ctx.beginPath(); ctx.moveTo(-5.5 * s, .6 * s); ctx.quadraticCurveTo(0, -1.5 * s, 5.5 * s, .4 * s); ctx.stroke();
+  ctx.fillStyle = "rgba(255,220,180,.18)"; ctx.beginPath(); ctx.ellipse(-2 * s, -1.6 * s, 2.4 * s, 1.1 * s, -.3, 0, 6.28); ctx.fill();
+  ctx.restore();
+}
+const fxGrind = makeFx("fxGrind", a => {
+  const { ctx, W, H, t, p } = a;
+  const g = grinderEl.getBoundingClientRect();
+  const hopX = g.left + g.width * .5, hopY = g.top + g.height * .05 + (-1.6 * g.width * .45 * smooth(clamp((p - .35) / .45, 0, 1)));
+  // beans: fall from above the screen into the hopper while the grinder is whole
+  const beanAlpha = 1 - smooth(clamp((p - .3) / .2, 0, 1));
+  if (beanAlpha > .01) beans.forEach(b => {
+    const life = (t * .28 * b.v + b.y) % 1;
+    const x = hopX + (b.x - .5) * g.width * .9 * (1 - life * .6) + Math.sin(t * 1.4 + b.w) * 6;
+    const y = -30 + life * (hopY + 30);
+    drawBean(ctx, x, y, b.r + t * b.v * 2, b.s, beanAlpha * (.35 + .65 * smooth(p * 3)));
+  });
+  // grounds: pour from the chute once the grinder is open
+  const k = smooth(clamp((p - .45) / .3, 0, 1));
+  if (k > .01) {
+    const chuteX = hopX, chuteY = g.top + g.height * .67;
+    grounds.forEach(q => {
+      const life = (t * .5 * q.v + q.y) % 1;
+      if (life > k) return;
+      const spread = 10 + 70 * life;
+      const x = chuteX + (q.x - .5) * spread + Math.sin(t * 2 + q.r) * 2;
+      const y = chuteY + life * (H - chuteY + 20);
+      ctx.globalAlpha = (1 - life * .6) * k; ctx.fillStyle = q.v > 1 ? "#6b3a1e" : "#3e2212";
+      ctx.fillRect(x, y, 2.2 * q.s, 2.2 * q.s);
+    });
+    ctx.globalAlpha = 1;
+  }
+});
+function layoutGrind(p){
+  const k = smooth(clamp((p - .35) / .45, 0, 1));            // 0 whole → 1 exploded
+  const W = grinderEl.getBoundingClientRect().width;
+  gparts.forEach(el => el.style.transform = `translate(${+el.dataset.dx * W * k}px, ${+el.dataset.dy * W * .45 * k}px) rotate(${+el.dataset.r * k}deg)`);
+  const spread = smooth(p) * Math.min(innerWidth * .05, 70);
+  [...document.getElementById("grindWord").children].forEach((sp, i, arr) => { const c = i - (arr.length - 1) / 2; sp.style.transform = `translate(${c * spread}px, ${Math.sin(i * 2.1) * spread * .15}px)`; });
+  document.querySelectorAll("#grind .tagline").forEach((tl, i) => { tl.style.opacity = clamp((p - .55 - i * .08) / .2, 0, 1); tl.style.transform = `translateY(${(1 - clamp((p - .55 - i * .08) / .2, 0, 1)) * 14}px)`; });
+}
+
+/* ================================================================
+ * 01c · POUR — the kettle tips, a thin stream arcs into the dripper,
+ * drips fall through, and the carafe fills
+ * ================================================================ */
+const kettleEl = document.getElementById("kettle"), dripperEl = document.getElementById("dripper");
+let kTilt = 0, kTx = 0, kTy = 0;
+const fxBrew = makeFx("fxBrew", a => {
+  const { ctx, W, H, t, p } = a;
+  const dr = dripperEl.getBoundingClientRect();
+  const rtl = document.documentElement.dir === "rtl";
+  // spout tip from the UNROTATED layout box, then through the same transform CSS applies:
+  // P' = O + T + R(P − O), with the origin O at (62%, 70%) and the tip at (2%, 36%) of the cutout
+  const sc = kettleEl.offsetParent.getBoundingClientRect();
+  const kl = sc.left + kettleEl.offsetLeft, kt = sc.top + kettleEl.offsetTop, kw = kettleEl.offsetWidth, kh = kettleEl.offsetHeight;
+  const O = [kl + kw * (rtl ? .38 : .62), kt + kh * .70], P = [kl + kw * (rtl ? .98 : .02), kt + kh * .36];
+  const ang = (rtl ? -1 : 1) * kTilt * Math.PI / 180, c = Math.cos(ang), sn = Math.sin(ang);
+  const sx = O[0] + kTx + (P[0] - O[0]) * c - (P[1] - O[1]) * sn, sy = O[1] + kTy + (P[0] - O[0]) * sn + (P[1] - O[1]) * c;
+  const dx = dr.left + dr.width * .46, dy = dr.top + dr.height * .5, rimY = dr.top + dr.height * .05;    // lands on the coffee surface, seen through the glass
+  const flow = smooth(clamp((p - .22) / .18, 0, 1)) * (1 - smooth(clamp((p - .82) / .12, 0, 1)));
+  if (flow > .01) {
+    ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+    const N = 48, pts = [];
+    for (let i = 0; i <= N; i++) {
+      const u = i / N * flow;
+      const x = lerp(sx, dx, smooth(u)) + Math.sin(u * 9 - t * 7) * 1.6 * u;      // a slow wobble, stronger near the bottom
+      const y = lerp(sy, dy, u * u * (3 - 2 * u) * .6 + u * u * .4);
+      pts.push([x, y]);
+    }
+    const ribbon = (w, col, list) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); list.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke(); };
+    const above = pts.filter(q => q[1] <= rimY), inside = pts.filter(q => q[1] >= rimY - 4);
+    const draw = list => { ribbon(7.5, "#2a150a", list); ribbon(5, "#4a2614", list); ctx.translate(-1.2, 0); ribbon(1.6, "rgba(190,120,70,.55)", list); ctx.translate(1.2, 0); };
+    if (inside.length > 1) { ctx.globalAlpha = .55; draw(inside); ctx.globalAlpha = 1; }   // behind the glass
+    if (above.length > 1) draw(above);
+    // the liquid moves: lighter beads travel down the ribbon
+    const at = u => { const k = Math.min(N - 1, Math.floor(u * N)), f = u * N - k; return [lerp(pts[k][0], pts[k + 1][0], f), lerp(pts[k][1], pts[k + 1][1], f)]; };
+    for (let i = 0; i < 9; i++) {
+      const u = ((t * 1.3 + i / 9) % 1) * flow; if (u < .02) continue;
+      const q = at(u); ctx.fillStyle = q[1] > rimY ? "rgba(205,140,80,.25)" : "rgba(205,140,80,.45)"; ctx.beginPath(); ctx.ellipse(q[0], q[1], 1.6, 4 + 3 * u, 0, 0, 6.28); ctx.fill();
+    }
+    // where it lands: dark splash rings on the coffee surface in the carafe
+    if (flow > .97) {
+      const cy = dr.top + dr.height * .5;
+      for (let i = 0; i < 3; i++) { const s2 = (t * 1.3 + i / 3) % 1; ctx.strokeStyle = `rgba(60,30,14,${(1 - s2) * .5})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(dx, cy, 6 + 34 * s2, 2 + 9 * s2, 0, 0, 6.28); ctx.stroke(); }
+      for (let i = 0; i < 5; i++) { const s2 = (t * 1.6 + i * .2) % 1; ctx.fillStyle = `rgba(74,38,20,${(1 - s2) * .5})`; ctx.beginPath(); ctx.arc(dx + Math.cos(i * 1.3 + t) * 12 * s2, cy + 2 - s2 * 14, 1.4, 0, 6.28); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+});
+function layoutBrew(p){
+  const inK = smooth(clamp(p / .25, 0, 1));
+  kTilt = -34 * smooth(clamp((p - .15) / .2, 0, 1)) + 34 * smooth(clamp((p - .82) / .12, 0, 1)) * 1;   // tip in, level out at the end
+  const rtl = document.documentElement.dir === "rtl";
+  kTx = (1 - inK) * innerWidth * .4 * (rtl ? -1 : 1); kTy = (1 - inK) * innerHeight * -.1;
+  kettleEl.style.transform = `${rtl ? "scaleX(-1) " : ""}translate(${kTx}px, ${kTy}px) rotate(${kTilt}deg)`;
+  const e = document.getElementById("brewEcho");
+  e.style.transform = `scaleY(${1.6 - .5 * smooth(p)}) translateY(${(1 - smooth(p)) * .15}em)`;
+  e.style.opacity = .35 + .6 * smooth(p);
+  e.style.fontVariationSettings = `"opsz" 144, "SOFT" 100, "WONK" 1, "wght" ${500 + 400 * smooth(p)}`;
+  document.getElementById("brewPct").textContent = Math.round(smooth(clamp((p - .3) / .55, 0, 1)) * 240) + " ml";
+}
+/* ================================================================
+ * 02 · ROLL — cinnamon flakes + sugar falling; letters split on scroll
+ * ================================================================ */
+const flakes = Array.from({ length: 170 }, () => ({ x: rnd(), y: rnd(), s: .4 + rnd() * 1.2, r: rnd() * 6.28, v: .5 + rnd(), kind: rnd() < .25 ? 1 : 0 }));
+const fxRoll = makeFx("fxRoll", a => {
+  const { ctx, W, H, t, p } = a;
+  // everything falls from the roll's top edge toward the bottom of the screen; the stream is centred
+  flakes.forEach(f => {
+    const life = ((t * .22 * f.v + f.y) % 1);          // 0 at the top, 1 at the bottom
+    const sway = Math.sin(t * 1.3 + f.r) * 18 * life;
+    const x = W * .5 + (f.x - .5) * (60 + 260 * life) + sway;
+    const y = H * .12 + life * H * .95;
+    const alpha = (1 - life) * (.25 + .75 * smooth(p * 2));   // the stream thickens as you scroll in
+    if (alpha < .02) return;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(f.r + t * f.v * 1.5); ctx.globalAlpha = alpha;
+    if (f.kind) { ctx.fillStyle = "#f6efe0"; ctx.beginPath(); ctx.arc(0, 0, 1.6 * f.s, 0, 6.28); ctx.fill(); }   // sugar
+    else { ctx.fillStyle = "#6b3a1e"; ctx.fillRect(-4 * f.s, -1.3 * f.s, 8 * f.s, 2.6 * f.s); }                 // cinnamon flake
+    ctx.restore();
+  });
+});
+const rollLetters = () => [...rollWord.children];
+function layoutRoll(p){
+  const spread = smooth(p) * Math.min(innerWidth * .07, 90);
+  rollLetters().forEach((s, i, arr) => { const k = i - (arr.length - 1) / 2; s.style.transform = `translate(${k * spread}px, ${Math.sin(i * 1.7) * spread * .12}px)`; });
+  document.getElementById("rollImg").style.transform = `translate(-50%,-50%) rotate(${-6 + 12 * smooth(p)}deg) scale(${.92 + .14 * smooth(p)})`;
+}
+
+/* ================================================================
+ * 03 · DAMASCENE — the cookie comes apart; petals fall
+ * ================================================================ */
+const petals = Array.from({ length: 36 }, () => ({ x: rnd(), y: rnd(), s: .5 + rnd(), r: rnd() * 6.28, v: .4 + rnd() * .8, w: .4 + rnd() }));
+const fxDam = makeFx("fxDam", a => {
+  const { ctx, W, H, t, p } = a; const k = smooth(p);
+  petals.forEach(f => {
+    const life = ((t * .07 * f.v + f.y) % 1);
+    const x = f.x * W + Math.sin(t * .9 * f.w + f.r) * 40;
+    const y = -40 + life * (H + 80);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(f.r + Math.sin(t * f.w + f.r) * .8); ctx.globalAlpha = .5 * k + .15;
+    ctx.fillStyle = "#b64a6d"; ctx.beginPath(); ctx.ellipse(0, 0, 7 * f.s, 4 * f.s, 0, 0, 6.28); ctx.fill();
+    ctx.fillStyle = "rgba(255,210,225,.5)"; ctx.beginPath(); ctx.ellipse(-2 * f.s, -1 * f.s, 3 * f.s, 1.6 * f.s, .4, 0, 6.28); ctx.fill();
+    ctx.restore();
+  });
+});
+const parts = [...document.querySelectorAll("#dam .part, #dam .tagline")];
+function layoutDam(p){
+  const k = smooth(p), R = Math.min(innerWidth, innerHeight) * .42;
+  parts.forEach(el => {
+    const x = +el.dataset.x * R * k, y = +el.dataset.y * R * k, r = (+el.dataset.r || 0) * k;
+    el.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${r}deg)`;
+    if (el.classList.contains("tagline")) el.style.opacity = clamp((p - .45) / .3, 0, 1);
+    else el.style.opacity = clamp(p * 4, 0, 1);
+  });
+  document.getElementById("damCluster").style.transform = `translate(-50%,-50%) rotate(${k * 10}deg) scale(${1 - k * .12})`;
+}
+
+/* ================================================================
+ * 04 · POUR — a cream stream pours into the cup; the cup fills
+ * ================================================================ */
+const fxPour = makeFx("fxPour", a => {
+  const { ctx, W, H, t, p } = a;
+  const cup = document.getElementById("cup").getBoundingClientRect();
+  const cx = cup.left + cup.width * .5, top = cup.top + cup.height * .12;
+  const len = smooth(clamp(p / .45, 0, 1));                 // the stream reaches the cup in the first half
+  if (len < .01) return;
+  // the stream: a tapered ribbon with a slow wobble, from above the screen to the cup's rim
+  const x0 = cx + cup.width * .22, y0 = -20, y1 = top;
+  ctx.save();
+  ctx.lineCap = "round";
+  const N = 40; const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const u = i / N, y = lerp(y0, y1, u * len);
+    const x = lerp(x0, cx, smooth(u * len)) + Math.sin(u * 9 - t * 7) * 3 * u;
+    pts.push([x, y, 14 - 8 * u]);
+  }
+  for (let i = 1; i < pts.length; i++) {
+    ctx.strokeStyle = "rgba(96,128,52,.95)"; ctx.lineWidth = pts[i][2]; ctx.beginPath(); ctx.moveTo(pts[i - 1][0], pts[i - 1][1]); ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke();
+    ctx.strokeStyle = "rgba(190,214,120,.8)"; ctx.lineWidth = pts[i][2] * .35; ctx.beginPath(); ctx.moveTo(pts[i - 1][0] - 1.5, pts[i - 1][1]); ctx.lineTo(pts[i][0] - 1.5, pts[i][1]); ctx.stroke();
+  }
+  // splash ring where it lands
+  if (len > .98) {
+    const s = (t * 1.6) % 1;
+    ctx.strokeStyle = `rgba(120,160,70,${(1 - s) * .8})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, y1 + 6, 10 + 40 * s, 4 + 14 * s, 0, 0, 6.28); ctx.stroke();
+    for (let i = 0; i < 6; i++) { const a2 = i * 1.05 + t * 3; const r = 14 + 22 * s; ctx.fillStyle = `rgba(120,160,70,${(1 - s) * .9})`; ctx.beginPath(); ctx.arc(cx + Math.cos(a2) * r, y1 + 4 + Math.sin(a2) * r * .35 - s * 30, 2.2, 0, 6.28); ctx.fill(); }
+  }
+  ctx.restore();
+});
+function layoutPour(p){
+  const fill = smooth(clamp((p - .4) / .6, 0, 1));
+  document.getElementById("pourPct").textContent = Math.round(fill * 100) + "%";
+  // the big echo word stretches and settles as you pour (the "Pyawrg" stretch in the reel)
+  const e = document.getElementById("pourEcho");
+  e.style.transform = `scaleY(${1.6 - .5 * smooth(p)}) translateY(${(1 - smooth(p)) * .15}em)`;
+  e.style.opacity = .35 + .6 * smooth(p);
+  e.style.fontVariationSettings = `"opsz" 144, "SOFT" 100, "WONK" 1, "wght" ${500 + 400 * smooth(p)}`;
+  document.getElementById("cup").style.transform = `${document.documentElement.dir === "rtl" ? "translateX(-70%)" : "translateX(-30%)"} translateY(${(1 - fill) * 10}px) rotate(${(1 - smooth(p)) * -4}deg)`;
+}
+
+/* ================================================================
+ * 05 · SIP — a coffee wave rises and wipes to night
+ * ================================================================ */
+const fxSip = makeFx("fxSip", a => {
+  const { ctx, W, H, t, p } = a;
+  const k = smooth(p);                                     // 0: wave off the bottom, 1: screen fully dark
+  const base = H * (1.12 - 1.3 * k);                         // the wave's mean height
+  const amp = 26 * (1 - Math.abs(k - .5) * 1.2);             // tallest mid-way
+  ctx.fillStyle = "#1b120d";
+  for (let layer = 0; layer < 3; layer++) {
+    ctx.globalAlpha = layer === 2 ? 1 : .55;
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 8) {
+      const y = base + layer * 22 + Math.sin(x / (180 + layer * 60) + t * (1.2 + layer * .3) + layer) * amp + Math.sin(x / 70 - t * 2) * amp * .25;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  }
+  // crema highlight on the crest
+  ctx.globalAlpha = .35 * (1 - k); ctx.strokeStyle = "#c68b4e"; ctx.lineWidth = 2; ctx.beginPath();
+  for (let x = 0; x <= W; x += 8) { const y = base + Math.sin(x / 180 + t * 1.2) * amp + Math.sin(x / 70 - t * 2) * amp * .25 - 2; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.stroke(); ctx.globalAlpha = 1;
+});
+function layoutSip(p){
+  const n = document.getElementById("night");
+  n.style.opacity = clamp((p - .62) / .3, 0, 1);
+  const cupK = smooth(clamp((p - .55) / .4, 0, 1));
+  document.getElementById("sipCup").style.transform = `translateX(-50%) translateY(${(1 - cupK) * 60}vh) rotate(${(1 - cupK) * -8}deg)`;
+  nav.classList.toggle("on-dark", p > .7);
+}
+
+/* ================================================================
+ * Scroll choreography, no libraries: each scene is position:sticky inside a tall
+ * .pin wrapper. progress = how far the wrapper has scrolled past the top, smoothed
+ * with a half-life so the scrub feels like GSAP's scrub: 0.6 rather than 1:1.
+ * ================================================================ */
+const scenes = [
+  { id: "find", fx: null,   layout: p => { findP = p; } },
+  { id: "grind", fx: fxGrind, layout: layoutGrind },
+  { id: "brew",  fx: fxBrew,  layout: layoutBrew },
+  { id: "roll", fx: fxRoll, layout: layoutRoll },
+  { id: "dam",  fx: fxDam,  layout: layoutDam },
+  { id: "pour", fx: fxPour, layout: layoutPour },
+  { id: "sip",  fx: fxSip,  layout: layoutSip },
+].map(s => ({ ...s, el: document.getElementById(s.id), pin: document.getElementById(s.id).parentElement, p: 0, target: 0, active: false }));
+const damp = (a, b, hl, dt) => a + (b - a) * (1 - Math.pow(2, -dt / hl));
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  const vh = innerHeight;
+  scenes.forEach(s => {
+    const r = s.pin.getBoundingClientRect();
+    s.target = clamp(-r.top / (r.height - vh), 0, 1);
+    const visible = r.bottom > 0 && r.top < vh;
+    if (visible !== s.active) { s.active = visible; if (s.fx) visible ? s.fx.start() : s.fx.stop(); }
+    if (!visible && Math.abs(s.target - s.p) < .001) return;
+    s.p = Math.abs(s.target - s.p) < .0005 ? s.target : damp(s.p, s.target, .12, dt);
+    if (s.fx) s.fx.p = s.p;
+    s.layout(s.p);
+  });
+  tickFind(now);
+  const menuTop = document.getElementById("menu").getBoundingClientRect().top;
+  if (menuTop < vh * .6) nav.classList.add("on-dark"); else if (scenes[scenes.length - 1].p < .7) nav.classList.remove("on-dark");
+  if (!CAPTURE) requestAnimationFrame(loop);
+}
+if (!reduce) {
+  scenes.forEach(s => s.layout(0));
+  requestAnimationFrame(loop);
+} else {
+  scenes.forEach(s => s.layout(1)); findP = 0;
+  document.getElementById("heroImg").style.transform = "translateX(-50%)";
+  cards.forEach(c => { c.style.opacity = 1; });
+}
+
+/* Frame-exact capture hook: ?capture → window.__step(dt) advances every canvas */
+if (CAPTURE) {
+  // __step(dt): settle the scroll scrub instantly, then advance every visible canvas by dt
+  window.__step = dt => { scenes.forEach(s => { const r = s.pin.getBoundingClientRect(); s.p = s.target = clamp(-r.top / (r.height - innerHeight), 0, 1); if (s.fx) s.fx.p = s.p; s.layout(s.p); if (s.fx && r.bottom > 0 && r.top < innerHeight) s.fx.step(dt); }); tickFind(performance.now()); };
+  window.__ready = true;
+}
+})();
+</script>
+</body>
+</html>

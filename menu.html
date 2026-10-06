@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<!--
+  NASH · Menu — the helix menu from the original NashBakery site (menu.html + js/menu-helix.js),
+  carried over into the Bake / Play remix. Same choreography: every menu item is one rung of a
+  double helix, its name in one language on the front strand and in the other language on the back
+  strand (phase + π). The rows scroll past a sticky round plate that shows whichever item is closest
+  to the centre of the screen. Chips jump to the first item of each category.
+  The helix itself was adapted from Valentin Descombes' "Scroll-Driven Dual-Wave Text Animation" (Codrops, 2026).
+-->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu — NASH Artisanal Bakery</title>
+<meta name="description" content="The full NASH menu: coffee, cookies, cinnamon rolls, cakes, matcha and drinks. Every day from 10AM until midnight.">
+<link rel="icon" href="assets/logo-ink.png">
+<style>
+  @font-face{font-family:"Fraunces";src:url(assets/fonts/Fraunces.woff) format("woff");font-weight:100 900;font-style:normal;font-display:swap}
+  @font-face{font-family:"Fraunces";src:url(assets/fonts/Fraunces-Italic.woff) format("woff");font-weight:100 900;font-style:italic;font-display:swap}
+  @font-face{font-family:"Inter";src:url(assets/fonts/Inter.woff) format("woff");font-weight:100 900;font-display:swap}
+  @font-face{font-family:"Reem Kufi";src:url(assets/fonts/ReemKufi.woff) format("woff");font-weight:400 700;font-display:swap}
+  @font-face{font-family:"IBM Plex Sans Arabic";src:url(assets/fonts/PlexArabic.woff) format("woff");font-weight:400;font-display:swap}
+  @font-face{font-family:"IBM Plex Sans Arabic";src:url(assets/fonts/PlexArabic-Medium.woff) format("woff");font-weight:500;font-display:swap}
+
+  :root{
+    --cream:#ecdfc8;--cream-2:#e3d2b4;--latte:#cdb48d;--crema:#b8743a;--espresso:#3b2417;--night:#1b120d;--night-2:#2a1b13;--olive:#80875c;--pist:#9fb068;
+    --f-display:"Fraunces",Georgia,serif;--f-body:"Inter",system-ui,sans-serif;--ease:cubic-bezier(.22,1,.36,1);--gutter:clamp(18px,4vw,56px);
+  }
+  html[lang="ar"]{--f-display:"Reem Kufi","Fraunces",sans-serif;--f-body:"IBM Plex Sans Arabic","Inter",sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--cream);color:var(--espresso);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{display:block;max-width:100%} a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus-visible{outline:2px solid var(--crema);outline-offset:4px;border-radius:4px}
+  ::selection{background:var(--espresso);color:var(--cream)}
+  .big{font-family:var(--f-display);font-weight:900;font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;line-height:.86;letter-spacing:-.02em;color:var(--crema);text-transform:uppercase}
+  html[lang="ar"] .big{font-weight:700;line-height:1.05;letter-spacing:0;text-transform:none}
+  .eyebrow{font-family:var(--f-display);font-style:italic;font-weight:400;font-variation-settings:"opsz" 24,"SOFT" 50;font-size:clamp(15px,1.3vw,19px);opacity:.75}
+  html[lang="ar"] .eyebrow{font-style:normal}
+  .cta{display:inline-flex;align-items:center;gap:10px;background:var(--espresso);color:var(--cream);border-radius:999px;padding:12px 22px;font-size:14px;font-weight:600;transition:transform .35s var(--ease)}
+  .cta:hover{transform:translateY(-2px)}
+  .cta .arr{display:inline-block;width:34px;height:1.5px;background:currentColor;position:relative}
+  .cta .arr::after{content:"";position:absolute;right:0;top:-4px;width:8px;height:8px;border:1.5px solid currentColor;border-left:0;border-bottom:0;transform:rotate(45deg)}
+  html[dir="rtl"] .cta .arr{transform:scaleX(-1)}
+
+  /* nav, same as the main page */
+  .nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:22px;padding:18px var(--gutter);mix-blend-mode:multiply;transition:background .4s}
+  .nav.on-dark{mix-blend-mode:normal;color:var(--cream)}
+  .nav .brand img{height:18px;width:auto}.nav .brand .cream{display:none}.nav.on-dark .brand .ink{display:none}.nav.on-dark .brand .cream{display:block}
+  .nav .sep{font-family:var(--f-display);font-weight:300;opacity:.6;font-size:18px}
+  .nav .slash{font-family:var(--f-display);font-weight:400;font-size:17px;letter-spacing:.06em;opacity:.8}
+  .nav ul{list-style:none;display:flex;gap:26px;margin-left:auto;font-size:13.5px;font-weight:500}
+  .nav ul a{opacity:.8}.nav ul a:hover,.nav ul a[aria-current]{opacity:1}
+  .nav .pill{border:1.5px solid currentColor;border-radius:999px;padding:8px 16px;font-size:13.5px;font-weight:600}
+  .nav .pill.fill{background:var(--espresso);color:var(--cream);border-color:var(--espresso)}
+  .nav.on-dark .pill.fill{background:var(--cream);color:var(--night);border-color:var(--cream)}
+  .nav .lang{font-family:"Reem Kufi",sans-serif;font-weight:600;font-size:17px;padding:4px 10px;line-height:1}
+  @media (max-width:860px){.nav ul{display:none}.nav{gap:12px}}
+
+  /* page head */
+  .phead{position:relative;padding:clamp(120px,18vh,180px) var(--gutter) clamp(40px,7vh,80px);display:grid;gap:14px;overflow:hidden}
+  .phead::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 80% at 70% 0%,rgba(255,255,255,.35),transparent 60%)}
+  .phead .crumbs{font-size:13px;opacity:.65;display:flex;gap:10px}
+  .phead h1{font-size:clamp(64px,13vw,200px)}
+  .phead p{max-width:40ch;font-size:clamp(15px,1.2vw,18px);opacity:.85}
+  .phead .mark{position:absolute;right:var(--gutter);bottom:-4vh;width:min(38vw,440px);opacity:.08;pointer-events:none}
+  html[dir="rtl"] .phead .mark{right:auto;left:var(--gutter)}
+
+  /* ---------- the helix (ported from the original NashBakery menu) ---------- */
+  .mhelix{
+    --R:min(24vw,340px);           /* helix radius, read by the script */
+    --plate:min(30vw,280px);
+    position:relative;isolation:isolate;color:var(--cream);
+    background:radial-gradient(ellipse at 50% 40%,var(--night-2) 0%,var(--night) 55%,#120c08 100%);
+    padding:40px 0 120px;
+  }
+  .mhelix::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;z-index:0;
+    background:repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 2px,transparent 2px 5px),repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px)}
+  .chips{position:sticky;top:84px;z-index:5;display:flex;gap:6px;overflow:auto;scrollbar-width:none;width:fit-content;max-width:calc(100vw - 2*var(--gutter));margin:0 auto;padding:6px;border-radius:999px;background:rgba(42,30,22,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;white-space:nowrap;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:background .3s,color .3s}
+  html[lang="ar"] .chip{letter-spacing:0;font-size:15px;text-transform:none}
+  .chip small{font-size:10px;opacity:.55}
+  .chip:hover,.chip.is-active{background:var(--cream);color:var(--night)}
+  .mhelix__track{position:relative}
+  .mhelix__layer{position:absolute;inset:0;z-index:2;pointer-events:none}
+  .mhelix__stage{position:sticky;top:0;height:100svh;display:grid;place-items:center}
+  .plate{position:relative;width:var(--plate);aspect-ratio:1;border-radius:50%;overflow:hidden;background:var(--crema);box-shadow:0 0 0 10px rgba(236,223,200,.08),0 40px 80px -20px rgba(0,0,0,.7)}
+  .plate__layer{position:absolute;inset:0;opacity:0;transform:scale(1.08);transition:opacity .5s var(--ease),transform .8s var(--ease);display:grid;place-items:center}
+  .plate__layer.is-on{opacity:1;transform:none}
+  .plate__layer img{width:100%;height:100%;object-fit:cover}
+  .plate__layer--icon{color:var(--night)}
+  .plate__layer--icon svg{width:42%;height:42%}
+  .plate__cap{position:absolute;left:50%;top:calc(50% + var(--plate)/2 + 22px);transform:translateX(-50%);width:min(88vw,34ch);text-align:center;display:grid;justify-items:center;gap:6px}
+  .plate__cap .cat{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--crema)}
+  html[lang="ar"] .plate__cap .cat{letter-spacing:0;text-transform:none;font-size:14px}
+  .plate__cap p{font-size:15px;opacity:.8;line-height:1.45}
+  .plate__cap .tag{margin-top:4px;display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--cream);color:var(--night)}
+  html[lang="ar"] .plate__cap .tag{letter-spacing:0;text-transform:none;font-size:12px}
+  .plate__cap [hidden]{display:none}
+  .mhelix__rows{position:relative;padding:40svh 0}
+  .hrow{position:relative;height:17svh;min-height:92px}
+  .hw{position:absolute;left:50%;top:50%;white-space:nowrap;will-change:transform,opacity;z-index:1;
+      transform:translate(-50%,-50%) translateX(var(--x,0px)) scale(var(--s,1));opacity:var(--o,1);transition:color .35s ease-out}
+  .hw.is-front{z-index:3}
+  .hw--a{font-family:var(--f-display);font-weight:700;font-variation-settings:"opsz" 96,"SOFT" 100,"WONK" 1;font-size:clamp(22px,3.4vw,50px);letter-spacing:-.02em;color:var(--cream)}
+  .hw--a:lang(ar){font-family:"Reem Kufi",var(--f-display);letter-spacing:0;font-variation-settings:normal}
+  .hw--b{font-family:var(--f-body);font-size:clamp(12px,1.2vw,16px);letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--pist)}
+  .hw--b:lang(ar){font-family:"IBM Plex Sans Arabic",var(--f-body);font-size:clamp(14px,1.4vw,19px);letter-spacing:0;text-transform:none}
+  .hw:not(.is-front){color:rgba(236,223,200,.45)}
+  .hrow.is-focused .hw--a{color:var(--crema)}
+  .hrow.is-focused .hw--b{color:var(--cream)}
+  .hrung{position:absolute;left:50%;top:50%;width:1px;height:1px;z-index:1;transform-origin:0 50%;background:linear-gradient(90deg,transparent,rgba(236,223,200,.35),transparent);will-change:transform,opacity}
+  .mhelix__note{text-align:center;opacity:.6;font-size:13px;padding:0 var(--gutter)}
+  @media (max-width:700px){.mhelix{--R:30vw;--plate:46vw}.hw--a{font-size:20px}.chips{top:72px}}
+
+  /* closing + footer */
+  .close{padding:14vh var(--gutter);display:grid;gap:18px;justify-items:start}
+  .close h2{font-size:clamp(48px,9vw,140px)}
+  footer{background:var(--night);color:var(--cream);padding:0 var(--gutter) 40px}
+  footer .row{display:flex;flex-wrap:wrap;gap:18px 40px;align-items:center;padding-top:28px;font-size:13px;opacity:.75}
+  footer .row img{height:16px;width:auto}
+  footer .row .r{margin-left:auto}
+  html[dir="rtl"] footer .row .r{margin-left:0;margin-right:auto}
+  @media (prefers-reduced-motion:reduce){.hw{transition:none}.plate__layer{transition:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav" aria-label="Main">
+  <a class="brand" href="index.html" aria-label="NASH home"><img class="ink" src="assets/nash-ink.png" alt="NASH"><img class="cream" src="assets/nash-cream.png" alt=""></a>
+  <span class="sep" aria-hidden="true">/</span>
+  <span class="slash" data-i18n="nav.play">BAKE</span>
+  <ul>
+    <li><a href="index.html#roll" data-i18n="nav.rolls">Rolls</a></li>
+    <li><a href="index.html#dam" data-i18n="nav.damascene">Damascene</a></li>
+    <li><a href="index.html#pour" data-i18n="nav.matcha">Matcha</a></li>
+    <li><a href="menu.html" aria-current="page" data-i18n="nav.menu">Menu</a></li>
+    <li><a href="index.html#sip" data-i18n="nav.visit">Visit</a></li>
+  </ul>
+  <button class="lang" id="lang" aria-label="Switch language">عربي</button>
+  <a class="pill fill" href="#helix" data-i18n="nav.order">Order</a>
+</nav>
+
+<header class="phead">
+  <div class="crumbs"><a href="index.html" data-i18n="p.home">Home</a><span>/</span><span data-i18n="nav.menu">Menu</span></div>
+  <div class="eyebrow" data-i18n="p.menu.e">What we bake</div>
+  <h1 class="big" data-i18n="menu.title">The Menu</h1>
+  <p data-i18n="p.menu.lead">Everything we bake and pour, every day from 10AM until midnight. Scroll, and the menu turns.</p>
+  <img class="mark" src="assets/logo-ink.png" alt="" aria-hidden="true">
+</header>
+
+<!-- Helix menu: item names twist around a sticky plate as you scroll. -->
+<section class="mhelix" id="helix" data-helix aria-label="Menu">
+  <nav class="chips" aria-label="Menu categories" data-helix-chips></nav>
+  <div class="mhelix__track">
+    <div class="mhelix__layer" aria-hidden="true">
+      <div class="mhelix__stage">
+        <div class="plate" data-plate></div>
+        <div class="plate__cap">
+          <span class="cat" data-cap-cat></span>
+          <p data-cap-desc></p>
+          <span class="tag" data-cap-tag hidden></span>
+        </div>
+      </div>
+    </div>
+    <div class="mhelix__rows" data-helix-rows></div>
+  </div>
+  <p class="mhelix__note" data-i18n="menu.note">Menu changes with the seasons — ask the counter for today's specials.</p>
+</section>
+
+<section class="close">
+  <div class="eyebrow" data-i18n="close.e">Open till midnight</div>
+  <h2 class="big" data-i18n="close.t">Hungry yet?</h2>
+  <a class="cta" href="index.html#sip"><span data-i18n="close.cta">NASH, at your door</span><i class="arr"></i></a>
+</section>
+
+<footer>
+  <div class="row">
+    <img src="assets/nash-cream.png" alt="NASH">
+    <span data-i18n="foot.line">Artisanal bakery · Damascus · Est. 2018</span>
+    <a class="r" href="index.html" data-i18n="p.back">← Back to the story</a>
+  </div>
+</footer>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Menu data (from the original site's js/i18n.js) ---------- */
+const MENU = [
+  { cat:"coffee", en:["Espresso","Our signature shot — bold, round, with a thick golden crema."], ar:["إسبريسو","الشوت المميّز — جريء ومتوازن مع كريما ذهبية كثيفة."], tag:["Signature","مميّز"] },
+  { cat:"coffee", en:["Pumpkin Spice Iced Latte","Espresso, milk and warm autumn spice over ice."], ar:["آيس لاتيه بهارات اليقطين","إسبريسو وحليب وبهارات الخريف الدافئة مع الثلج."], tag:["Seasonal","موسمي"] },
+  { cat:"cookies", img:"assets/menu/damascene.webp", en:["The Damascene","White chocolate, Aleppo pistachio and Damascene rose."], ar:["الدمشقية","شوكولا بيضاء، فستق حلبي وورد دمشقي."], tag:["Signature","مميّز"] },
+  { cat:"cookies", en:["Chocolate Chip","The classic — crisp edges, soft middle."], ar:["تشوكليت تشيب","الكلاسيكية — أطراف مقرمشة وقلب طري."] },
+  { cat:"cookies", en:["White Chocolate","Sweet, buttery and generous."], ar:["شوكولا بيضاء","حلوة، غنية بالزبدة وسخية."] },
+  { cat:"cookies", en:["Cookie Monster","Loud, blue and loaded."], ar:["كوكي مونستر","جريئة، زرقاء ومليئة بالمفاجآت."] },
+  { cat:"cookies", en:["Cranberry Orange","Tart berries, bright citrus."], ar:["توت بري وبرتقال","توت لاذع وحمضيات منعشة."] },
+  { cat:"cookies", en:["Oatmeal Raisin","Chewy oats, plump raisins, warm spice."], ar:["شوفان وزبيب","شوفان طري وزبيب وبهارات دافئة."] },
+  { cat:"rolls", img:"assets/menu/cinnamon-bliss.webp", en:["Cinnamon Bliss","Cream cheese glaze and toasted walnuts. The one that started it all."], ar:["سينامون بليس","كريمة الجبن والجوز المحمّص. البداية."], tag:["Signature","مميّز"] },
+  { cat:"rolls", en:["Walnut Cinnamon Roll","Our roll, loaded with toasted walnuts."], ar:["لفافة القرفة بالجوز","لفافتنا مع الكثير من الجوز المحمّص."] },
+  { cat:"rolls", en:["Mini Rolls","Bite-size bliss for sharing."], ar:["ميني رولز","سعادة بحجم لقمة للمشاركة."], tag:["Pre-order","بالطلب المسبق"] },
+  { cat:"cakes", img:"assets/menu/cheesecake.webp", en:["Basque Cheesecake","Burnished top, soft center, lavender cream."], ar:["تشيز كيك باسك","سطح محروق، قلب طري، وكريمة اللافندر."], tag:["Must try","جرّبها"] },
+  { cat:"cakes", en:["English Cake","Butter loaf baked low and slow, finished with warm chocolate, pistachio and Damascene rose."], ar:["الكيك الإنجليزي","كيك بالزبدة يُخبز على مهل، ويُزيَّن بالشوكولا الدافئة والفستق والورد الدمشقي."] },
+  { cat:"cakes", en:["Strawberry Almond Muffins","Fresh berries and toasted almond."], ar:["مافن الفراولة واللوز","فراولة طازجة ولوز محمّص."] },
+  { cat:"cakes", en:["Pumpkin Spice Cake","Moist, spiced, autumn in a slice."], ar:["كيك بهارات اليقطين","طرية ومتبّلة — الخريف في شريحة."], tag:["Seasonal","موسمي"] },
+  { cat:"cakes", en:["Seasonal Specials","Ask the counter what came out of the oven today."], ar:["أطباق موسمية","اسألونا عمّا خرج من الفرن اليوم."] },
+  { cat:"drinks", img:"assets/menu/matcha-latte.webp", en:["Matcha Latte","Silky, earthy, perfectly balanced."], ar:["ماتشا لاتيه","ناعمة، ترابية ومتوازنة."] },
+  { cat:"drinks", img:"assets/menu/strawberry-matcha.webp", en:["Strawberry Foam Matcha","Layered strawberry, milk and a matcha cloud."], ar:["ماتشا بفوم الفراولة","طبقات من الفراولة والحليب وغيمة ماتشا."], tag:["Fan favourite","الأكثر طلباً"] },
+  { cat:"drinks", img:"assets/menu/caramel-matcha.webp", en:["Salted Caramel Matcha","Salted caramel base, iced matcha on top."], ar:["ماتشا بالكراميل المملّح","قاعدة كراميل مملّح وماتشا مثلّجة."] },
+];
+const CAT_LABEL = { coffee:["Coffee","القهوة"], cookies:["Cookies","كوكيز"], rolls:["Cinnamon Rolls","لفائف القرفة"], cakes:["Cakes","كيك"], drinks:["Matcha & Drinks","ماتشا ومشروبات"] };
+const ICONS = {
+  coffee:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 20h24v8a10 10 0 0 1-10 10h-4a10 10 0 0 1-10-10z"/><path d="M34 22h3a4 4 0 0 1 0 8h-4"/><path d="M8 42h30"/><path d="M18 8c-2 3 2 5 0 8M24 8c-2 3 2 5 0 8"/></svg>',
+  cookies:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="24" cy="24" r="16"/><circle cx="18" cy="19" r="2" fill="currentColor"/><circle cx="28" cy="16" r="1.6" fill="currentColor"/><circle cx="29" cy="28" r="2.2" fill="currentColor"/><circle cx="19" cy="30" r="1.5" fill="currentColor"/></svg>',
+  rolls:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M24 24a2 2 0 1 1 2-2 5 5 0 0 1-5 5 8 8 0 0 1-8-8 11 11 0 0 1 11-11 14 14 0 0 1 14 14 17 17 0 0 1-17 17"/></svg>',
+  cakes:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 36V22l30-10v24z"/><path d="M8 22l30-10M8 29l30-7"/><path d="M6 40h36"/></svg>',
+  drinks:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 14h22l-3 28H16z"/><path d="M11 14h26M26 14l4-9"/><path d="M15 26h18"/></svg>',
+};
+
+/* ---------- Language (shares the "nash-lang" setting with index.html) ---------- */
+const AR = {
+  "nav.play":"اخبز","nav.rolls":"اللفائف","nav.damascene":"الدمشقية","nav.matcha":"الماتشا","nav.menu":"القائمة","nav.visit":"زورونا","nav.order":"اطلب الآن",
+  "p.home":"الرئيسية","p.menu.e":"ماذا نخبز","menu.title":"القائمة","p.menu.lead":"كل ما نخبزه ونسكبه، كل يوم من ١٠ صباحاً حتى منتصف الليل. مرّر، وتدور القائمة.",
+  "menu.note":"القائمة تتغيّر مع المواسم — اسأل الكاونتر عن أطباق اليوم.","close.e":"مفتوح حتى منتصف الليل","close.t":"جعت؟","close.cta":"NASH إلى بابك",
+  "foot.line":"مخبز حِرفي · دمشق · تأسس ٢٠١٨","p.back":"← العودة إلى القصة"
+};
+const EN = {}; $$("[data-i18n]").forEach(el => { EN[el.dataset.i18n] ??= el.innerHTML; });
+let lang = "en";
+const isAR = () => lang === "ar";
+function setLang(l){
+  lang = l; const dict = l === "ar" ? AR : EN;
+  $$("[data-i18n]").forEach(el => { const v = dict[el.dataset.i18n]; if (v != null) el.innerHTML = v; });
+  document.documentElement.lang = l; document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
+  $("#lang").textContent = l === "ar" ? "EN" : "عربي";
+  try { localStorage.setItem("nash-lang", l); } catch (e) {}
+  build(); measure(); focused = -1; focus(closestIndex());
+}
+$("#lang").addEventListener("click", () => setLang(isAR() ? "en" : "ar"));
+
+/* ---------- Helix (same logic as the original js/menu-helix.js) ---------- */
+const section = $("[data-helix]"), rowsEl = $("[data-helix-rows]"), plate = $("[data-plate]");
+const capCat = $("[data-cap-cat]"), capDesc = $("[data-cap-desc]"), capTag = $("[data-cap-tag]"), chipsEl = $("[data-helix-chips]");
+const WAVE_NUMBER = 0.42;   // radians of twist between neighbouring rows
+const WAVE_SPEED = 1.6;     // full helix turns across the whole section
+const TAU_MS = 140;         // easing time constant for the strands
+let items = [], focused = -1, R = 300;
+
+// one plate layer per item (photo, or the category icon), cross-faded on focus
+MENU.forEach(m => { const l = document.createElement("div"); l.className = "plate__layer" + (m.img ? "" : " plate__layer--icon"); l.innerHTML = m.img ? `<img src="${m.img}" alt="" loading="lazy">` : ICONS[m.cat]; plate.append(l); });
+const layers = $$(".plate__layer", plate);
+
+function build(){
+  const ar = isAR(); rowsEl.innerHTML = "";
+  items = MENU.map((m, i) => {
+    const row = document.createElement("div"); row.className = "hrow"; row.dataset.cat = m.cat;
+    const a = document.createElement("div"); a.className = "hw hw--a"; a.lang = ar ? "ar" : "en"; a.dir = ar ? "rtl" : "ltr"; a.textContent = (ar ? m.ar : m.en)[0];
+    const b = document.createElement("div"); b.className = "hw hw--b"; b.lang = ar ? "en" : "ar"; b.dir = ar ? "ltr" : "rtl"; b.textContent = (ar ? m.en : m.ar)[0];
+    const r = document.createElement("div"); r.className = "hrung";
+    row.append(r, a, b); rowsEl.append(row);
+    return { m, i, row, a, b, r, cur: null };
+  });
+  chipsEl.innerHTML = Object.keys(CAT_LABEL).map(c => `<button class="chip" type="button" data-cat="${c}">${CAT_LABEL[c][ar ? 1 : 0]} <small>${String(MENU.filter(m => m.cat === c).length).padStart(2, "0")}</small></button>`).join("");
+}
+chipsEl.addEventListener("click", e => {
+  const chip = e.target.closest("[data-cat]"); if (!chip) return;
+  items.find(it => it.m.cat === chip.dataset.cat)?.row.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+});
+function measure(){ const probe = document.createElement("div"); probe.style.cssText = "position:absolute;visibility:hidden;width:var(--R)"; section.append(probe); R = probe.offsetWidth; probe.remove(); }
+function progress(){ const rect = rowsEl.getBoundingClientRect(); const total = rect.height + innerHeight; return Math.min(1, Math.max(0, (innerHeight - rect.top) / total)); }
+function closestIndex(){ const c = innerHeight / 2; let best = 0, bestD = Infinity; items.forEach((it, i) => { const r = it.row.getBoundingClientRect(); const d = Math.abs(r.top + r.height / 2 - c); if (d < bestD) { bestD = d; best = i; } }); return best; }
+// depth → scale, opacity and stacking: the front half passes over the plate, the back half under it
+function place(el, x, z){ const t = (z + 1) / 2; el.style.setProperty("--x", x.toFixed(1) + "px"); el.style.setProperty("--s", (0.62 + 0.38 * t).toFixed(3)); el.style.setProperty("--o", (0.25 + 0.75 * t).toFixed(3)); el.classList.toggle("is-front", z >= 0); }
+function focus(i){
+  if (i === focused) return; focused = i; const ar = isAR(), m = MENU[i];
+  items.forEach((it, j) => it.row.classList.toggle("is-focused", j === i));
+  layers.forEach((l, j) => l.classList.toggle("is-on", j === i));
+  capCat.textContent = CAT_LABEL[m.cat][ar ? 1 : 0]; capDesc.textContent = (ar ? m.ar : m.en)[1];
+  capTag.hidden = !m.tag; if (m.tag) capTag.textContent = m.tag[ar ? 1 : 0];
+  $$(".chip", chipsEl).forEach(c => c.classList.toggle("is-active", c.dataset.cat === m.cat));
+}
+let running = false, last = 0;
+function frame(now){
+  if (!running) return;
+  const dt = Math.min(64, now - last); last = now;
+  const k = reduced ? 1 : 1 - Math.exp(-dt / TAU_MS);
+  const prog = reduced ? 0 : progress();
+  items.forEach(it => {
+    const target = WAVE_NUMBER * it.i + WAVE_SPEED * prog * Math.PI * 2;      // scroll turns the whole helix
+    it.cur = it.cur === null ? target : it.cur + (target - it.cur) * k;        // strands ease toward it
+    const xa = Math.sin(it.cur) * R, za = Math.cos(it.cur);
+    place(it.a, xa, za); place(it.b, -xa, -za);                                // the two strands are π apart
+    it.r.style.transform = `translateX(${Math.min(xa, -xa).toFixed(1)}px) scaleX(${Math.abs(2 * xa).toFixed(1)})`;
+    it.r.style.opacity = (0.12 + 0.5 * Math.abs(Math.sin(it.cur))).toFixed(3);  // the rung fades when edge-on
+  });
+  focus(closestIndex());
+  requestAnimationFrame(frame);
+}
+function start(){ if (running) return; running = true; last = performance.now(); requestAnimationFrame(frame); }
+
+build(); measure(); focus(0);
+try { if (localStorage.getItem("nash-lang") === "ar") setLang("ar"); } catch (e) {}
+addEventListener("resize", measure);
+new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else running = false; }).observe(section);
+
+// nav turns cream while the dark helix is under it
+const nav = $("#nav");
+new IntersectionObserver(([e]) => nav.classList.toggle("on-dark", e.isIntersecting), { rootMargin: "-40px 0px -95% 0px" }).observe(section);
+if (new URLSearchParams(location.search).has("capture")) window.__ready = true;
+})();
+</script>
+</body>
+</html>
